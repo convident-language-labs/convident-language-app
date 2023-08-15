@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "tri-cluck-mobile",
-    "slug": "tri-cluck-mobile",
+    "name": "convident-mobile",
+    "slug": "convident-language",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -28,9 +28,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "133f8ddf-fef5-45b4-a401-cfd61050cad2"
+        "projectId": "c33749de-4aab-473f-ac9c-b456a3115244"
       }
     },
-    "owner": "sprilt21"
+    "owner": "convident"
   }
 }

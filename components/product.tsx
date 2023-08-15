@@ -96,7 +96,7 @@ export default function MainProduct() {
           
           let data = new FormData();
           data.append("fileUrl", url)
-          await fetch('https://api-beige-one-57.vercel.app/sttmobile/' + baseLang + '/' + targetLang + '/', {
+          await fetch('https://convident-language-api.vercel.app/sttmobile/' + baseLang + '/' + targetLang + '/', {
             method: 'POST',
             body: data,
             headers: {
@@ -121,7 +121,7 @@ export default function MainProduct() {
         let message = new FormData();
         let response = ""
         message.append('message',firstMsg)
-        await fetch('https://api-beige-one-57.vercel.app/reply/', {
+        await fetch('https://convident-language-api.vercel.app/reply/', {
         //await fetch('http://localhost:5000/reply/', {
             method: 'POST',
             body: message,
@@ -135,7 +135,7 @@ export default function MainProduct() {
         
         let toSpeak = new FormData()
         toSpeak.append('text',response)
-        await fetch('https://api-beige-one-57.vercel.app/speak/' + targetLang + '/', {
+        await fetch('https://convident-language-api.vercel.app/speak/' + targetLang + '/', {
         //await fetch('http://localhost:5000/speak/', {
             method: 'POST',
             body: toSpeak,
