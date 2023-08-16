@@ -1,5 +1,5 @@
 import React, { useState , useRef , useEffect } from 'react';
-import {Text, View, StyleSheet, Pressable, Platform } from 'react-native';
+import {Text, View, StyleSheet, Pressable, Platform, TextInput } from 'react-native';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
@@ -7,6 +7,8 @@ import * as FileSystem from 'expo-file-system';
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getFirestore, collection, doc, getDocs, addDoc, setDoc } from 'firebase/firestore'
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -24,7 +26,11 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const storage = getStorage(app);
+const auth = getAuth(app);
+
+const userRef = collection(db, 'users')
 
 export default function MainProduct() {
 
@@ -36,6 +42,7 @@ export default function MainProduct() {
     const [targetLang, setTarget] = useState("en")
     const [messages, setMsgs] = useState<string[]>([])
     const [replies, setReplies] = useState<string[]>([])
+
     const langs = [
         {key:'0', value:"English"},
         {key:'1', value:"Chinese"},
@@ -43,25 +50,25 @@ export default function MainProduct() {
     ]
 
     async function startRecording() {
-        try {
-          console.log('Requesting permissions..');
-          await Audio.requestPermissionsAsync();
-          await Audio.setAudioModeAsync({
-            allowsRecordingIOS: true,
-            playsInSilentModeIOS: true,
-          });
-    
-          console.log('Starting recording..');
-          const { recording } = await Audio.Recording.createAsync( Audio.RecordingOptionsPresets.HIGH_QUALITY
-          );
-          setRecording(recording);
-          console.log('Recording started');
-        } catch (err) {
-          console.error('Failed to start recording', err);
-        }
+      try {
+        console.log('Requesting permissions..');
+        await Audio.requestPermissionsAsync();
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+  
+        console.log('Starting recording..');
+        const { recording } = await Audio.Recording.createAsync( Audio.RecordingOptionsPresets.HIGH_QUALITY
+        );
+        setRecording(recording);
+        console.log('Recording started');
+      } catch (err) {
+        console.error('Failed to start recording', err);
       }
+    }
     
-      async function stopRecording() {
+    async function stopRecording() {
         console.log('Stopping recording..');
         setRecording(undefined);
         await recording.stopAndUnloadAsync();
@@ -157,7 +164,7 @@ export default function MainProduct() {
             })
 
         })
-      }
+    }
 
     const convoTexts = messages.map((message,i) => {
         return <View className = "" key={i}>
@@ -187,10 +194,60 @@ export default function MainProduct() {
                 </View>
     })
 
+    const [loggedIn, setLogged] = useState(false)
+    const [email, onChangeEmail]=  useState("")
+    const [pass, onChangePass]=  useState("")
+    async function login() {
+        console.log(email)
+        console.log(pass)
+        setLogged(true)
+        
+    }
+    const logInForm = (
+      <View>
+        <TextInput className = "border-2 m-2 p-2" onChangeText = {onChangeEmail} value = {email} inputMode="email" placeholder="Email"/>
+        <TextInput className = "border-2 m-2 p-2" onChangeText = {onChangePass} value = { pass } secureTextEntry={true} placeholder="Password" />
+        <Pressable className="bg-gray-500 self-center w-24 p-4" onPress={login}><Text className="text-white text-center font-Ubuntu">Login</Text></Pressable>
+      </View>
+    )
+    const [regEmail, onRegEmail]=  useState("")
+    const [regPass, onRegPass]=  useState("")
+    const [regFirst, onSetFirst] = useState("")
+    const [regLast, onSetLast] = useState("")
+    async function signup() {
+        console.log(regEmail)
+        console.log(regPass)
+        console.log(regFirst)
+        console.log(regLast)
+
+        createUserWithEmailAndPassword(auth, regEmail, regPass).then((cred) => {
+          console.log("user created: " + cred.user)
+          console.log(cred.user.uid)
+          
+          setDoc(doc(db, "users", cred.user.uid), {
+            "first-name":regFirst,
+            "last-name":regLast
+          })
+          setLogged(true)
+        })
+    }
+    const signUpForm = (
+      <View>
+        <View className="flex-row w-full">
+          <TextInput className = "border-2 m-2 mr-[8%] p-2 w-2/5" onChangeText = {onSetFirst} value = {regFirst} placeholder="First Name"/>
+          <TextInput className = "border-2 m-2 ml-[8%] p-2 w-2/5" onChangeText = {onSetLast} value = {regLast} placeholder="Last Name"/>
+        </View>
+        <TextInput className = "border-2 m-2 p-2" onChangeText = {onRegEmail} value = {regEmail} inputMode="email" placeholder="Email"/>
+        <TextInput className = "border-2 m-2 p-2" onChangeText = {onRegPass} value = {regPass} secureTextEntry={true} placeholder="Password" />
+        <Pressable className="bg-gray-500 self-center w-24 p-4" onPress={signup}><Text className="text-white text-center font-Ubuntu">Sign Up</Text></Pressable>
+      </View>
+    )
+
     return (
         <View id="product">
             <Text className="text-5xl xl:text-7xl mt-2 text-center font-Ubuntu text-off-black">Test Our Product</Text>
-            
+            { signUpForm }
+            { logInForm }
             <View className="flex-row w-full">
                 <View className="mr-[8%] ml-8 w-1/3">
                     <Text className="mt-3 font-Ubuntu text-center ">Base Language</Text>
